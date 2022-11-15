@@ -1,6 +1,6 @@
 name: Region
 version: '${project.version}'
-main: me.tewpingz.region.Region
+main: me.tewpingz.region.RegionPlugin
 api-version: 1.19
 authors: [ TewPingz ]
 description: A region plugin made for my SeniorTeam application
