@@ -1,4 +1,4 @@
-package me.tewpingz.region;
+package me.tewpingz.region.model;
 
 import lombok.*;
 import org.bukkit.Location;
@@ -7,7 +7,6 @@ import org.bukkit.block.Block;
 
 @Data
 @EqualsAndHashCode
-@AllArgsConstructor
 @RequiredArgsConstructor
 public class RegionCuboid {
     private final int minX, maxX, minY, maxY, minZ, maxZ;

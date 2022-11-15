@@ -77,13 +77,13 @@ public class RegionPersistence {
             this.connection = dataSource.getConnection();
 
             String regionQuery = "CREATE TABLE IF NOT EXISTS REGIONS("
-                    + "REGION_ID VARCHAR(16) NOT NULL,"
-                    + "PRIMARY KEY (ROUTE_NAME)"
+                    + "REGION_ID INTEGER  NOT NULL AUTO_INCREMENT,"
+                    + "REGION_NAME VARCHAR(16) NOT NULL,"
+                    + "PRIMARY KEY (REGION_ID)"
                     + ")";
 
             String cuboidQuery = "CREATE TABLE IF NOT EXISTS REGION_CUBOID("
-                    + "REGION_CUBOID_ID INTEGER  NOT NULL AUTO_INCREMENT,"
-                    + "REGION_ID VARCHAR(16) NOT NULL,"
+                    + "REGION_ID INTEGER NOT NULL,"
                     + "MIN_X INTEGER NOT NULL,"
                     + "MIN_Y INTEGER NOT NULL,"
                     + "MIN_Z INTEGER NOT NULL,"
@@ -91,12 +91,12 @@ public class RegionPersistence {
                     + "MAX_Y INTEGER NOT NULL,"
                     + "MAX_Z INTEGER NOT NULL,"
                     + "WORLD_NAME VARCHAR(16) NOT NULL,"
-                    + "PRIMARY KEY (REGION_CUBOID_ID)"
+                    + "PRIMARY KEY (REGION_ID)"
                     + ")";
 
             String whitelistQuery = "CREATE TABLE IF NOT EXISTS REGION_WHITELIST("
                     + "WHITELIST_ID INTEGER  NOT NULL AUTO_INCREMENT,"
-                    + "REGION_ID VARCHAR(16) NOT NULL,"
+                    + "REGION_ID INTEGER NOT NULL,"
                     + "PLAYER_UUID VARCHAR(36) NOT NULL,"
                     + "PRIMARY KEY (WHITELIST_ID)"
                     + ")";
