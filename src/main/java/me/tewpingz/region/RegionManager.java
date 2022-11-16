@@ -5,6 +5,7 @@ import me.tewpingz.region.model.Region;
 import me.tewpingz.region.model.RegionCuboid;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -26,7 +27,7 @@ public class RegionManager {
     @Getter
     private final ItemStack selectionWand;
 
-    public RegionManager(RegionPersistence persistence) {
+    protected RegionManager(RegionPersistence persistence) {
         this.persistence = persistence;
         this.idToRegion = new ConcurrentHashMap<>();
         this.nameToId = new ConcurrentHashMap<>();
@@ -43,6 +44,11 @@ public class RegionManager {
         this.loadRegions();
     }
 
+    /**
+     * A function that allows you to create a region
+     * @param name the name of region to create
+     * @param regionCuboid the region cuboid
+     */
     public void createRegion(String name, RegionCuboid regionCuboid) {
         this.persistence.getConnectionAsync().thenApply(connection -> {
             try {
@@ -81,7 +87,91 @@ public class RegionManager {
         }).thenAccept(this::cacheRegion);
     }
 
-    public void loadRegions() {
+    /**
+     * A function that allows you to rename a region but keep track of its name in the map
+     * @param id the id of the region
+     * @param name the new name of the region
+     */
+    public void renameRegion(int id, String name) {
+        Objects.requireNonNull(name);
+        Region region = this.getRegionById(id);
+        Objects.requireNonNull(region);
+        this.nameToId.remove(region.getName().toLowerCase());
+        region.updateName(name);
+        this.nameToId.put(name.toLowerCase(), region.getId());
+    }
+
+    /**
+     * A function that allows you to find a region based on its id
+     * @param id the id to look for
+     * @return the region instance if found otherwise null
+     */
+    public Region getRegionById(int id) {
+        return this.idToRegion.get(id);
+    }
+
+    /**
+     * A function that allows you to get a region based on its name
+     * @param name the name of the region to try and find
+     * @return the region if found otherwise null
+     */
+    public Region getRegionByName(String name) {
+        Objects.requireNonNull(name);
+        Integer integer = this.nameToId.get(name.toLowerCase());
+        if (integer == null) {
+            return null;
+        }
+        return this.getRegionById(integer);
+    }
+
+    /**
+     * A function that allows you to get a region based on its location
+     * As stated below the implementation of this was quick, this should be implemented using
+     * a grid system that combines a 5 x 5 chunk radius together and then the user should
+     * loop through those instead because they will be able to loop through fewer entries over time
+     * which will help the server tremendously
+     * @param location the location to check if the region is inside
+     * @return the region if it was found otherwise null
+     */
+    public Region getRegionByLocation(Location location) {
+        // In reality this should not be used, this is just a test plugin
+        // This should be placed into a chunk grid map so if there are lots of entries
+        // The server doesn't waste time processing through each entry one by one
+        // But rather loop through a small amount of entries that are near the location to check
+        // If the location is in a region.
+        for (Region region : this.getRegions()) {
+            if (region.contains(location)) {
+                return region;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * A function that allows you to get the list of registered region names
+     * @return the set of region names
+     */
+    public Set<String> getRegionNames() {
+        return this.nameToId.keySet();
+    }
+
+    /**
+     * A function that allows you to get the registered regions
+     * @return the collection of registered regions
+     */
+    public Collection<Region> getRegions() {
+        return this.idToRegion.values();
+    }
+
+    private void cacheRegion(Region region) {
+        if (region == null) {
+            return;
+        }
+        this.nameToId.put(region.getName().toLowerCase(), region.getId());
+        this.idToRegion.put(region.getId(), region);
+    }
+
+    private void loadRegions() {
         this.persistence.getConnectionAsync().thenAccept(connection -> {
             try {
                 // Select all the regions
@@ -127,43 +217,5 @@ public class RegionManager {
                 throw new RuntimeException(e);
             }
         });
-    }
-
-    public void renameRegion(int id, String name) {
-        Objects.requireNonNull(name);
-        Region region = this.getRegionById(id);
-        Objects.requireNonNull(region);
-        this.nameToId.remove(region.getName().toLowerCase());
-        region.updateName(name);
-        this.nameToId.put(name.toLowerCase(), region.getId());
-    }
-
-    public Region getRegionById(int id) {
-        return this.idToRegion.get(id);
-    }
-
-    public Region getRegionByName(String name) {
-        Objects.requireNonNull(name);
-        Integer integer = this.nameToId.get(name.toLowerCase());
-        if (integer == null) {
-            return null;
-        }
-        return this.getRegionById(integer);
-    }
-
-    public Set<String> getRegionNames() {
-        return this.nameToId.keySet();
-    }
-
-    public Collection<Region> getRegions() {
-        return this.idToRegion.values();
-    }
-
-    private void cacheRegion(Region region) {
-        if (region == null) {
-            return;
-        }
-        this.nameToId.put(region.getName().toLowerCase(), region.getId());
-        this.idToRegion.put(region.getId(), region);
     }
 }

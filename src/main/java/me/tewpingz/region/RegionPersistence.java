@@ -20,7 +20,7 @@ public class RegionPersistence {
      * The constructor for the persistence of the region plugin
      * @param plugin the plugin instance
      */
-    public RegionPersistence(RegionPlugin plugin) {
+    protected RegionPersistence(RegionPlugin plugin) {
         plugin.getConfig().options().copyDefaults();
         plugin.saveDefaultConfig();
         FileConfiguration configuration = plugin.getConfig();
