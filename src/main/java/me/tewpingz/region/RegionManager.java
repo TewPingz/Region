@@ -64,6 +64,7 @@ public class RegionManager {
                 if (idResultSet.next()) {
                     int id = idResultSet.getInt(1);
                     Region region = new Region(id, name);
+                    region.setRegionCuboid(regionCuboid);
 
                     // Insert cuboid
                     PreparedStatement insertCuboid = connection.prepareStatement("INSERT INTO REGION_CUBOID (REGION_ID, MIN_X, MIN_Y, MIN_Z, MAX_X, MAX_Y, MAX_Z, WORLD_NAME) VALUES(?,?,?,?,?,?,?,?)");
