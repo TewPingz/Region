@@ -2,6 +2,7 @@ package me.tewpingz.region.listener;
 
 import lombok.RequiredArgsConstructor;
 import me.tewpingz.region.RegionPlugin;
+import me.tewpingz.region.model.Region;
 import me.tewpingz.region.profile.RegionProfile;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -52,20 +53,28 @@ public class RegionListener implements Listener {
             case RIGHT_CLICK_BLOCK -> {
                 profile.setSelectionOne(event.getClickedBlock().getLocation());
                 player.sendMessage(Component.text("You have selected the first location.").color(NamedTextColor.GREEN));
-                if (profile.isCuboidSelected()) {
-                    player.sendMessage(Component.text("Congratulations you have selected a valid cuboid!").color(NamedTextColor.GOLD));
-                    player.sendMessage(Component.text("You many now continue by using /region create / name OR").color(NamedTextColor.GOLD));
-                    player.sendMessage(Component.text("Update your a current cuboid through /region <name>").color(NamedTextColor.GOLD));
-                }
+                this.attemptToApply(profile, player);
             }
             case LEFT_CLICK_BLOCK -> {
                 profile.setSelectionTwo(event.getClickedBlock().getLocation());
                 player.sendMessage(Component.text("You have selected the second location.").color(NamedTextColor.GREEN));
-                if (profile.isCuboidSelected()) {
-                    player.sendMessage(Component.text("Congratulations you have selected a valid cuboid!").color(NamedTextColor.GOLD));
-                    player.sendMessage(Component.text("You many now continue by using /region create / name OR").color(NamedTextColor.GOLD));
-                    player.sendMessage(Component.text("Update your a current cuboid through /region <name>").color(NamedTextColor.GOLD));
-                }
+                this.attemptToApply(profile, player);
+            }
+        }
+    }
+
+    private void attemptToApply(RegionProfile profile, Player player) {
+        if (profile.isCuboidSelected()) {
+            if (profile.getSelectingFor() != -1) {
+                Region region = RegionPlugin.getInstance().getRegionManager().getRegionById(profile.getSelectingFor());
+                region.updateRegionCuboid(profile.toRegionCuboid());
+                profile.setSelectingFor(-1);
+                profile.setSelectionOne(null);
+                profile.setSelectionTwo(null);
+                player.sendMessage(Component.text("Congratulations you have updated the cuboid for %s!".formatted(region.getName())).color(NamedTextColor.GOLD));
+            } else {
+                player.sendMessage(Component.text("Congratulations you have selected a valid cuboid!").color(NamedTextColor.GOLD));
+                player.sendMessage(Component.text("You many now continue by using /region create").color(NamedTextColor.GOLD));
             }
         }
     }

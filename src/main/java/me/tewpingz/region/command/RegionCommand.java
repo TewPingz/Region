@@ -2,6 +2,8 @@ package me.tewpingz.region.command;
 
 import lombok.RequiredArgsConstructor;
 import me.tewpingz.region.RegionPlugin;
+import me.tewpingz.region.menu.RegionMenu;
+import me.tewpingz.region.menu.RegionsMenu;
 import me.tewpingz.region.model.Region;
 import me.tewpingz.region.profile.RegionProfile;
 import net.kyori.adventure.text.Component;
@@ -37,13 +39,49 @@ public class RegionCommand implements CommandExecutor {
             case "add" -> this.handleAddCommand(sender, command, label, shortArgs);
             case "remove" -> this.handleRemoveCommand(sender, command, label, shortArgs);
             case "whitelist" -> this.handleWhitelistCommand(sender, command, label, shortArgs);
+            default -> this.handleRegionMenuCommand(sender, command, label, argument, shortArgs);
         }
 
         return false;
     }
 
     private void handleRootCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(Component.text("Console cannot execute this command").color(NamedTextColor.RED));
+            return;
+        }
 
+        Player player = (Player) sender;
+
+        if (!player.hasPermission("region.menu")) {
+            sender.sendMessage(Component.text("You do not have permission to perform this command!").color(NamedTextColor.RED));
+            return;
+        }
+
+        new RegionsMenu().open(player);
+    }
+
+    private void handleRegionMenuCommand(CommandSender sender, Command command, String label, String argumentLabel, String[] args) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(Component.text("Console cannot execute this command").color(NamedTextColor.RED));
+            return;
+        }
+
+        Player player = (Player) sender;
+
+        if (!player.hasPermission("region.menu")) {
+            sender.sendMessage(Component.text("You do not have permission to perform this command!").color(NamedTextColor.RED));
+            return;
+        }
+
+        Region region = this.regionPlugin.getRegionManager().getRegionByName(argumentLabel);
+
+        if (region == null) {
+            sender.sendMessage(Component.text("There is no region with that name").color(NamedTextColor.RED));
+            return;
+        }
+
+        new RegionMenu(region).open(player);
     }
 
     private void handleCreateCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -85,6 +123,8 @@ public class RegionCommand implements CommandExecutor {
 
         this.regionPlugin.getRegionManager().createRegion(name, profile.toRegionCuboid());
         player.sendMessage(Component.text("You have successfully created a region with the name %s".formatted(name)).color(NamedTextColor.GREEN));
+        profile.setSelectionOne(null);
+        profile.setSelectionTwo(null);
     }
 
     private void handleWandCommand(CommandSender sender, Command command, String label, String[] args) {

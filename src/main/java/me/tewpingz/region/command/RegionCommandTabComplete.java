@@ -38,6 +38,10 @@ public class RegionCommandTabComplete implements TabCompleter {
                     completions.add(regionCommandEntry.getLabel());
                 }
             });
+
+            if (sender.hasPermission("region.menu")) {
+                completions.addAll(RegionPlugin.getInstance().getRegionManager().getRegionNames());
+            }
         } else {
             String argument = args[0].toLowerCase().trim();
             switch (args.length) {

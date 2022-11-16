@@ -31,6 +31,20 @@ public class Region {
         this.whitelisted = new HashSet<>();
     }
 
+    public void updateName(String name) {
+        this.name = name;
+        RegionPlugin.getInstance().getRegionPersistence().getConnectionAsync().thenAccept(connection -> {
+            try {
+                PreparedStatement updateStatement = connection.prepareStatement("UPDATE REGIONS SET REGION_NAME=? WHERE REGION_ID=?");
+                updateStatement.setString(1, name);
+                updateStatement.setInt(2, this.id);
+                updateStatement.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
     /**
      * A function that allows you to set the region cuboid
      * Update the region cuboid without having to make a manual connection to the database.
@@ -48,6 +62,7 @@ public class Region {
                 updateStatement.setInt(5, regionCuboid.getMaxY());
                 updateStatement.setInt(6, regionCuboid.getMaxZ());
                 updateStatement.setString(7, regionCuboid.getWorldName());
+                updateStatement.setInt(8, this.id);
                 updateStatement.executeUpdate();
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -90,7 +105,7 @@ public class Region {
         this.whitelisted.remove(uuid);
         RegionPlugin.getInstance().getRegionPersistence().getConnectionAsync().thenAccept(connection -> {
             try {
-                PreparedStatement deleteWhitelist = connection.prepareStatement("DELETE FROM REGION_WHITELIST WHERE REGION_ID=? PLAYER_UUID=?");
+                PreparedStatement deleteWhitelist = connection.prepareStatement("DELETE FROM REGION_WHITELIST WHERE REGION_ID=? AND PLAYER_UUID=?");
                 deleteWhitelist.setInt(1, this.id);
                 deleteWhitelist.setString(2, uuid.toString());
                 deleteWhitelist.executeUpdate();

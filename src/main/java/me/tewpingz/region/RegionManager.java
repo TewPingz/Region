@@ -129,11 +129,21 @@ public class RegionManager {
         });
     }
 
+    public void renameRegion(int id, String name) {
+        Objects.requireNonNull(name);
+        Region region = this.getRegionById(id);
+        Objects.requireNonNull(region);
+        this.nameToId.remove(region.getName().toLowerCase());
+        region.updateName(name);
+        this.nameToId.put(name.toLowerCase(), region.getId());
+    }
+
     public Region getRegionById(int id) {
         return this.idToRegion.get(id);
     }
 
     public Region getRegionByName(String name) {
+        Objects.requireNonNull(name);
         Integer integer = this.nameToId.get(name.toLowerCase());
         if (integer == null) {
             return null;
@@ -143,6 +153,10 @@ public class RegionManager {
 
     public Set<String> getRegionNames() {
         return this.nameToId.keySet();
+    }
+
+    public Collection<Region> getRegions() {
+        return this.idToRegion.values();
     }
 
     private void cacheRegion(Region region) {

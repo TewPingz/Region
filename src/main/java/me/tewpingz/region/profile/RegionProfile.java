@@ -13,6 +13,7 @@ public class RegionProfile {
 
     private final UUID playerId;
     private Location selectionOne, selectionTwo;
+    private int selectingFor = -1;
 
     public boolean isCuboidSelected() {
         return this.selectionOne != null && this.selectionTwo != null && this.selectionOne.getWorld().getUID().equals(this.selectionTwo.getWorld().getUID());

@@ -1,5 +1,7 @@
 package me.tewpingz.region;
 
+import fr.mrmicky.fastinv.FastInv;
+import fr.mrmicky.fastinv.FastInvManager;
 import lombok.Getter;
 import me.tewpingz.region.command.RegionCommand;
 import me.tewpingz.region.command.RegionCommandTabComplete;
@@ -22,6 +24,8 @@ public final class RegionPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         instance = this;
+
+        FastInvManager.register(this);
         this.regionPersistence = new RegionPersistence(this);
         this.regionProfileManager = new RegionProfileManager();
         this.regionManager = new RegionManager(this.regionPersistence);
