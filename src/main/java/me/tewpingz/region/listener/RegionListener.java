@@ -34,7 +34,7 @@ public class RegionListener implements Listener {
             return;
         }
 
-        Region region = this.regionPlugin.getRegionManager().getRegionByLocation(event.getInteractionPoint());
+        Region region = this.regionPlugin.getRegionManager().getRegionByLocation(event.getClickedBlock().getLocation());
 
         if (region == null) {
             return;

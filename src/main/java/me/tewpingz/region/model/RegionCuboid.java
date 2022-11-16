@@ -47,7 +47,7 @@ public class RegionCuboid {
      * @return if the location is inside the cuboid or not
      */
     public boolean contains(int x, int y, int z) {
-        return this.minX >= x && this.maxX <= x && this.minY >= y && this.maxY <= y && this.minZ >= z && this.maxZ <= z;
+        return x >= this.minX && x <= this.maxX && y >= this.minY && y <= this.maxY && z >= this.minZ && z <= this.maxZ;
     }
 
     /**
