@@ -152,6 +152,7 @@ public class RegionCommand implements CommandExecutor {
     private void handleAddCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("region.add")) {
             sender.sendMessage(Component.text("You do not have permission to perform this command!").color(NamedTextColor.RED));
+            return;
         }
 
         if (args.length <= 1) {
@@ -187,6 +188,7 @@ public class RegionCommand implements CommandExecutor {
     private void handleRemoveCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("region.remove")) {
             sender.sendMessage(Component.text("You do not have permission to perform this command!").color(NamedTextColor.RED));
+            return;
         }
 
         if (args.length <= 1) {
@@ -222,6 +224,7 @@ public class RegionCommand implements CommandExecutor {
     private void handleWhitelistCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("region.whitelist")) {
             sender.sendMessage(Component.text("You do not have permission to perform this command!").color(NamedTextColor.RED));
+            return;
         }
 
         if (args.length == 0) {
