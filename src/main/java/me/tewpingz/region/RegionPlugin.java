@@ -2,9 +2,11 @@ package me.tewpingz.region;
 
 import lombok.Getter;
 import me.tewpingz.region.command.RegionCommand;
+import me.tewpingz.region.command.RegionCommandTabComplete;
 import me.tewpingz.region.listener.RegionListener;
 import me.tewpingz.region.listener.RegionProfileListener;
 import me.tewpingz.region.profile.RegionProfileManager;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
 @Getter
@@ -24,7 +26,10 @@ public final class RegionPlugin extends JavaPlugin {
         this.regionProfileManager = new RegionProfileManager();
         this.regionManager = new RegionManager(this.regionPersistence);
 
-        this.getCommand("region").setExecutor(new RegionCommand(this));
+        PluginCommand pluginCommand = this.getCommand("region");
+        pluginCommand.setExecutor(new RegionCommand(this));
+        pluginCommand.setTabCompleter(new RegionCommandTabComplete());
+
         this.getServer().getPluginManager().registerEvents(new RegionProfileListener(this.regionProfileManager), this);
         this.getServer().getPluginManager().registerEvents(new RegionListener(this), this);
     }

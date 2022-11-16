@@ -120,6 +120,18 @@ public class RegionManager {
         });
     }
 
+    public Region getRegionById(int id) {
+        return this.idToRegion.get(id);
+    }
+
+    public Region getRegionByName(String name) {
+        Integer integer = this.nameToId.get(name.toLowerCase());
+        if (integer == null) {
+            return null;
+        }
+        return this.getRegionById(integer);
+    }
+
     private void cacheRegion(Region region) {
         if (region == null) {
             return;

@@ -7,8 +7,5 @@ description: A region plugin made for my SeniorTeam application
 website: https://www.tewpingz.me
 commands:
   region:
-    permission: me.tewpingz.region
     aliases: [ r ]
     description: A command that lets you setup regions and edit them
-    permission-message: You do not have permission to perform this command
-    usage: /region <create|wand|add|remove|whitelist> OR /region

@@ -44,10 +44,15 @@ public class RegionCommand implements CommandExecutor {
         if (!(sender instanceof Player)) {
             return;
         }
+
         Player player = (Player) sender;
 
+        if (!player.hasPermission("region.create")) {
+            sender.sendMessage(Component.text("You do not have permission to perform this command!").color(NamedTextColor.RED));
+        }
+
         if (args.length == 0) {
-            sender.sendMessage(Component.text("Usage: /%s create <name>").color(NamedTextColor.RED));
+            sender.sendMessage(Component.text("Usage: /%s create <name>".formatted(label)).color(NamedTextColor.RED));
             return;
         }
 
@@ -55,6 +60,11 @@ public class RegionCommand implements CommandExecutor {
 
         if (name.length() >= 16) {
             sender.sendMessage(Component.text("That name is too long").color(NamedTextColor.RED));
+            return;
+        }
+
+        if (this.regionPlugin.getRegionManager().getRegionByName(name) != null) {
+            sender.sendMessage(Component.text("There is already a region with that name").color(NamedTextColor.RED));
             return;
         }
 
@@ -66,13 +76,26 @@ public class RegionCommand implements CommandExecutor {
         }
 
         this.regionPlugin.getRegionManager().createRegion(name, profile.toRegionCuboid());
+        player.sendMessage(Component.text("You have successfully created a region with the name %s".formatted(name)).color(NamedTextColor.GREEN));
     }
 
     private void handleWandCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
             return;
         }
+
         Player player = (Player) sender;
+
+        if (!player.hasPermission("region.create")) {
+            sender.sendMessage(Component.text("You do not have permission to perform this command!").color(NamedTextColor.RED));
+        }
+
+        if (player.getInventory().contains(this.regionPlugin.getRegionManager().getSelectionWand())) {
+            sender.sendMessage(Component.text("You already have a selection wand!").color(NamedTextColor.RED));
+            return;
+        }
+
         player.getInventory().addItem(this.regionPlugin.getRegionManager().getSelectionWand());
+        player.sendMessage(Component.text("You have been given the wand!").color(NamedTextColor.GOLD));
     }
 }
