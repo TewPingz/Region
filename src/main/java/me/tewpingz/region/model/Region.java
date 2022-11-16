@@ -9,18 +9,15 @@ import org.bukkit.block.Block;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Data
 public class Region {
 
     private final int id;
 
-    @Getter(AccessLevel.NONE)
     // should not be accessed externally because people mess with lists!
-    private final List<UUID> whitelisted;
+    private final Set<UUID> whitelisted;
 
     // This cant be final as in the requirements they want the ability to rename the cuboid
     private String name;
@@ -31,7 +28,7 @@ public class Region {
     public Region(int id, String name) {
         this.id = id;
         this.name = name;
-        this.whitelisted = new ArrayList<>();
+        this.whitelisted = new HashSet<>();
     }
 
     /**
@@ -73,6 +70,16 @@ public class Region {
      */
     public void addToWhitelist(UUID uuid) {
         this.whitelisted.add(uuid);
+        RegionPlugin.getInstance().getRegionPersistence().getConnectionAsync().thenAccept(connection -> {
+            try {
+                PreparedStatement insertWhitelist = connection.prepareStatement("INSERT INTO REGION_WHITELIST (REGION_ID, PLAYER_UUID) VALUES(?,?)");
+                insertWhitelist.setInt(1, this.id);
+                insertWhitelist.setString(2, uuid.toString());
+                insertWhitelist.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     /**
@@ -81,6 +88,16 @@ public class Region {
      */
     public void removeFromWhitelist(UUID uuid) {
         this.whitelisted.remove(uuid);
+        RegionPlugin.getInstance().getRegionPersistence().getConnectionAsync().thenAccept(connection -> {
+            try {
+                PreparedStatement deleteWhitelist = connection.prepareStatement("DELETE FROM REGION_WHITELIST WHERE REGION_ID=? PLAYER_UUID=?");
+                deleteWhitelist.setInt(1, this.id);
+                deleteWhitelist.setString(2, uuid.toString());
+                deleteWhitelist.executeUpdate();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     /**

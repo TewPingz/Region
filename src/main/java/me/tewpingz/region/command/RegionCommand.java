@@ -2,9 +2,12 @@ package me.tewpingz.region.command;
 
 import lombok.RequiredArgsConstructor;
 import me.tewpingz.region.RegionPlugin;
+import me.tewpingz.region.model.Region;
 import me.tewpingz.region.profile.RegionProfile;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -31,6 +34,9 @@ public class RegionCommand implements CommandExecutor {
         switch (argument.toLowerCase()) {
             case "create" -> this.handleCreateCommand(sender, command, label, shortArgs);
             case "wand" -> this.handleWandCommand(sender, command, label, shortArgs);
+            case "add" -> this.handleAddCommand(sender, command, label, shortArgs);
+            case "remove" -> this.handleRemoveCommand(sender, command, label, shortArgs);
+            case "whitelist" -> this.handleWhitelistCommand(sender, command, label, shortArgs);
         }
 
         return false;
@@ -42,6 +48,7 @@ public class RegionCommand implements CommandExecutor {
 
     private void handleCreateCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
+            sender.sendMessage(Component.text("Console cannot execute this command").color(NamedTextColor.RED));
             return;
         }
 
@@ -49,6 +56,7 @@ public class RegionCommand implements CommandExecutor {
 
         if (!player.hasPermission("region.create")) {
             sender.sendMessage(Component.text("You do not have permission to perform this command!").color(NamedTextColor.RED));
+            return;
         }
 
         if (args.length == 0) {
@@ -81,6 +89,7 @@ public class RegionCommand implements CommandExecutor {
 
     private void handleWandCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) {
+            sender.sendMessage(Component.text("Console cannot execute this command").color(NamedTextColor.RED));
             return;
         }
 
@@ -88,6 +97,7 @@ public class RegionCommand implements CommandExecutor {
 
         if (!player.hasPermission("region.create")) {
             sender.sendMessage(Component.text("You do not have permission to perform this command!").color(NamedTextColor.RED));
+            return;
         }
 
         if (player.getInventory().contains(this.regionPlugin.getRegionManager().getSelectionWand())) {
@@ -97,5 +107,107 @@ public class RegionCommand implements CommandExecutor {
 
         player.getInventory().addItem(this.regionPlugin.getRegionManager().getSelectionWand());
         player.sendMessage(Component.text("You have been given the wand!").color(NamedTextColor.GOLD));
+    }
+
+    private void handleAddCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!sender.hasPermission("region.add")) {
+            sender.sendMessage(Component.text("You do not have permission to perform this command!").color(NamedTextColor.RED));
+        }
+
+        if (args.length <= 1) {
+            sender.sendMessage(Component.text("Usage: /%s add <name> <player>".formatted(label)).color(NamedTextColor.RED));
+            return;
+        }
+
+        String regionName = args[0];
+        Region region = this.regionPlugin.getRegionManager().getRegionByName(regionName);
+
+        if (region == null) {
+            sender.sendMessage(Component.text("There is no region with that name").color(NamedTextColor.RED));
+            return;
+        }
+
+        String playerName = args[1];
+        OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(playerName);
+
+        if (!targetPlayer.hasPlayedBefore()) {
+            sender.sendMessage(Component.text("That player has not joined before!").color(NamedTextColor.RED));
+            return;
+        }
+
+        if (region.isWhitelisted(targetPlayer.getUniqueId())) {
+            sender.sendMessage(Component.text("That player is already whitelisted!").color(NamedTextColor.RED));
+            return;
+        }
+
+        region.addToWhitelist(targetPlayer.getUniqueId());
+        sender.sendMessage(Component.text("You have added %s to the whitelist!".formatted(targetPlayer.getName())).color(NamedTextColor.GREEN));
+    }
+
+    private void handleRemoveCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!sender.hasPermission("region.remove")) {
+            sender.sendMessage(Component.text("You do not have permission to perform this command!").color(NamedTextColor.RED));
+        }
+
+        if (args.length <= 1) {
+            sender.sendMessage(Component.text("Usage: /%s remove <name> <player>".formatted(label)).color(NamedTextColor.RED));
+            return;
+        }
+
+        String regionName = args[0];
+        Region region = this.regionPlugin.getRegionManager().getRegionByName(regionName);
+
+        if (region == null) {
+            sender.sendMessage(Component.text("There is no region with that name").color(NamedTextColor.RED));
+            return;
+        }
+
+        String playerName = args[1];
+        OfflinePlayer targetPlayer = Bukkit.getOfflinePlayer(playerName);
+
+        if (!targetPlayer.hasPlayedBefore()) {
+            sender.sendMessage(Component.text("That player has not joined before!").color(NamedTextColor.RED));
+            return;
+        }
+
+        if (!region.isWhitelisted(targetPlayer.getUniqueId())) {
+            sender.sendMessage(Component.text("That player is not whitelisted!").color(NamedTextColor.RED));
+            return;
+        }
+
+        region.removeFromWhitelist(targetPlayer.getUniqueId());
+        sender.sendMessage(Component.text("You have removed %s from the whitelist!".formatted(targetPlayer.getName())).color(NamedTextColor.GREEN));
+    }
+
+    private void handleWhitelistCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!sender.hasPermission("region.whitelist")) {
+            sender.sendMessage(Component.text("You do not have permission to perform this command!").color(NamedTextColor.RED));
+        }
+
+        if (args.length == 0) {
+            sender.sendMessage(Component.text("Usage: /%s whitelist <name>".formatted(label)).color(NamedTextColor.RED));
+            return;
+        }
+
+        String regionName = args[0];
+        Region region = this.regionPlugin.getRegionManager().getRegionByName(regionName);
+
+        if (region == null) {
+            sender.sendMessage(Component.text("There is no region with that name").color(NamedTextColor.RED));
+            return;
+        }
+
+        if (region.getWhitelisted().isEmpty()) {
+            sender.sendMessage(Component.text("There is nobody whitelisted to that region!").color(NamedTextColor.RED));
+            return;
+        }
+
+        sender.sendMessage(Component.text("Whitelisted players for %s".formatted(region.getName())).color(NamedTextColor.GOLD));
+        region.getWhitelisted().forEach(uuid -> {
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+            if (offlinePlayer.hasPlayedBefore()) {
+                sender.sendMessage(Component.text(" - %s".formatted(offlinePlayer.getName())).color(NamedTextColor.YELLOW));
+            }
+        });
     }
 }

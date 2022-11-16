@@ -14,8 +14,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RegionManager {
@@ -111,8 +110,18 @@ public class RegionManager {
                         String worldName = cuboidResultSet.getString("WORLD_NAME");
                         RegionCuboid cuboid = new RegionCuboid(minX, maxX, minY, maxY, minZ, maxZ, worldName);
                         region.setRegionCuboid(cuboid);
-                        this.cacheRegion(region);
                     }
+
+                    // Find the region whitelists
+                    PreparedStatement whitelistStatement = connection.prepareStatement("SELECT * FROM REGION_WHITELIST WHERE REGION_ID=?");
+                    whitelistStatement.setInt(1, id);
+                    ResultSet whitelistResultSet = whitelistStatement.executeQuery();
+                    while (whitelistResultSet.next()) {
+                        UUID playerId = UUID.fromString(whitelistResultSet.getString("PLAYER_UUID"));
+                        region.getWhitelisted().add(playerId);
+                    }
+
+                    this.cacheRegion(region);
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);
@@ -130,6 +139,10 @@ public class RegionManager {
             return null;
         }
         return this.getRegionById(integer);
+    }
+
+    public Set<String> getRegionNames() {
+        return this.nameToId.keySet();
     }
 
     private void cacheRegion(Region region) {
